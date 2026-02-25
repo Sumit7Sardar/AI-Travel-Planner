@@ -55,12 +55,41 @@ const Index = () => {
         throw new Error("Request failed");
       }
 
-      const text = await response.text();
-      try {
-        const json = JSON.parse(text);
-        setItinerary(json.itinerary || text);
-      } catch {
-        setItinerary(text);
+      const contentType = response.headers.get("content-type") || "";
+      const isStream =
+        contentType.includes("text/event-stream") ||
+        contentType.includes("text/plain") ||
+        contentType.includes("application/octet-stream");
+
+      if (isStream && response.body) {
+        setIsLoading(false);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+
+          const lines = chunk.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.replace("data: ", "").trim();
+              if (data === "[DONE]") break;
+              setItinerary((prev) => prev + data);
+            } else if (line.trim() && !line.startsWith(":")) {
+              setItinerary((prev) => prev + line);
+            }
+          }
+        }
+      } else {
+        const text = await response.text();
+        try {
+          const json = JSON.parse(text);
+          setItinerary(json.itinerary || text);
+        } catch {
+          setItinerary(text);
+        }
       }
     } catch (err) {
       setError("Sorry, something went wrong. Please try again.");
