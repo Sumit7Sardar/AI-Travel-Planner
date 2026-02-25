@@ -27,7 +27,6 @@ const Index = () => {
     setValidationError("");
     setError("");
 
-    // Validate all fields
     if (!destination.trim() || !dates.trim() || !travelType) {
       setValidationError("Please fill in all fields");
       return;
@@ -41,9 +40,7 @@ const Index = () => {
         "https://johnsmith7.app.n8n.cloud/webhook/travel-itinerary",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             location: destination.trim(),
             dates: dates.trim(),
@@ -52,44 +49,53 @@ const Index = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Request failed");
-      }
+      if (!response.ok) throw new Error("Request failed");
 
-      const contentType = response.headers.get("content-type") || "";
-      const isStream =
-        contentType.includes("text/event-stream") ||
-        contentType.includes("text/plain") ||
-        contentType.includes("application/octet-stream");
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let streamStarted = false;
 
-      if (isStream && response.body) {
-        setIsLoading(false);
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
+        const parts = buffer.split(/(?<=\})\s+(?=\{)/);
+        buffer = parts.pop() || "";
 
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const data = line.replace("data: ", "").trim();
-              if (data === "[DONE]") break;
-              setItinerary((prev) => prev + data);
-            } else if (line.trim() && !line.startsWith(":")) {
-              setItinerary((prev) => prev + line);
+        for (const part of parts) {
+          try {
+            const parsed = JSON.parse(part.trim());
+            if (
+              parsed.type === "item" &&
+              parsed.metadata?.nodeName === "AI Agent" &&
+              typeof parsed.content === "string"
+            ) {
+              if (!streamStarted) {
+                setIsLoading(false);
+                streamStarted = true;
+              }
+              setItinerary((prev) => prev + parsed.content);
             }
+          } catch {
+            // Incomplete JSON fragment
           }
         }
-      } else {
-        const text = await response.text();
+      }
+
+      if (buffer.trim()) {
         try {
-          const json = JSON.parse(text);
-          setItinerary(json.itinerary || text);
+          const parsed = JSON.parse(buffer.trim());
+          if (
+            parsed.type === "item" &&
+            parsed.metadata?.nodeName === "AI Agent" &&
+            typeof parsed.content === "string"
+          ) {
+            setItinerary((prev) => prev + parsed.content);
+          }
         } catch {
-          setItinerary(text);
+          // ignore malformed trailing chunk
         }
       }
     } catch (err) {
