@@ -34,6 +34,7 @@ const Index = () => {
     }
 
     setIsLoading(true);
+    setItinerary("");
 
     try {
       const response = await fetch(
