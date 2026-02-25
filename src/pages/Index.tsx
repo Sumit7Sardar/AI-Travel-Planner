@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +56,12 @@ const Index = () => {
       }
 
       const text = await response.text();
-      setItinerary(text);
+      try {
+        const json = JSON.parse(text);
+        setItinerary(json.itinerary || text);
+      } catch {
+        setItinerary(text);
+      }
     } catch (err) {
       setError("Sorry, something went wrong. Please try again.");
     } finally {
@@ -196,8 +202,8 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="whitespace-pre-wrap text-card-foreground leading-relaxed">
-                {itinerary}
+              <div className="prose prose-sm max-w-none text-card-foreground">
+                <ReactMarkdown>{itinerary}</ReactMarkdown>
               </div>
               <Button
                 onClick={handleReset}
