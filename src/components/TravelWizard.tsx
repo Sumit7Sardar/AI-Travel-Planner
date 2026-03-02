@@ -33,11 +33,12 @@ export interface WizardFormData {
 interface TravelWizardProps {
   onSubmit: (data: WizardFormData) => void;
   isLoading: boolean;
+  itinerary?: string;
 }
 
 const TOTAL_STEPS = 5;
 
-const TravelWizard = ({ onSubmit, isLoading }: TravelWizardProps) => {
+const TravelWizard = ({ onSubmit, isLoading, itinerary = "" }: TravelWizardProps) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<WizardFormData>({
     departureCity: "",
@@ -353,12 +354,17 @@ const TravelWizard = ({ onSubmit, isLoading }: TravelWizardProps) => {
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-1 h-12 text-base font-semibold bg-primary hover:bg-primary/90"
+            className="flex-1 h-12 text-base font-semibold bg-primary hover:bg-primary/90 transition-colors"
           >
-            {isLoading ? (
+            {isLoading && !itinerary ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Creating your itinerary...
+                Maya is planning your trip...
+              </>
+            ) : isLoading && itinerary ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Still writing...
               </>
             ) : (
               "Generate My Itinerary ✨"
