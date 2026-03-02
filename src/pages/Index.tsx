@@ -113,7 +113,7 @@ const Index = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <TravelWizard onSubmit={handleGenerate} isLoading={isLoading} />
+            <TravelWizard onSubmit={handleGenerate} isLoading={isLoading} itinerary={itinerary} />
           </CardContent>
         </Card>
 
