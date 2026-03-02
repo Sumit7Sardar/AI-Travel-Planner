@@ -12,8 +12,8 @@ const Index = () => {
 
   const handleGenerate = async (data: WizardFormData) => {
     setError("");
+    setItinerary(""); // clear previous result
     setIsLoading(true);
-    setItinerary("");
 
     try {
       const response = await fetch(
@@ -36,8 +36,9 @@ const Index = () => {
       );
 
       if (!response.ok) throw new Error("Request failed");
+      if (!response.body) throw new Error("No response body");
 
-      const reader = response.body!.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
       let streamStarted = false;
@@ -51,8 +52,10 @@ const Index = () => {
         buffer = parts.pop() || "";
 
         for (const part of parts) {
+          const trimmed = part.trim();
+          if (!trimmed) continue;
           try {
-            const parsed = JSON.parse(part.trim());
+            const parsed = JSON.parse(trimmed);
             if (
               parsed.type === "item" &&
               parsed.metadata?.nodeName === "AI Agent" &&
@@ -65,7 +68,7 @@ const Index = () => {
               setItinerary((prev) => prev + parsed.content);
             }
           } catch {
-            // Incomplete JSON fragment
+            // Incomplete JSON fragment — will be retried with next chunk
           }
         }
       }
