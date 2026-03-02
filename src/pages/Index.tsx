@@ -130,8 +130,8 @@ const Index = () => {
           </Card>
         )}
 
-        {/* Itinerary Display Card */}
-        {itinerary && !error && (
+        {/* Show itinerary card as soon as ANY content arrives */}
+        {itinerary && (
           <Card className="shadow-xl border-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
             <CardHeader className="pb-3">
               <CardTitle className="text-xl font-bold text-card-foreground">
@@ -142,10 +142,17 @@ const Index = () => {
               <div className="prose prose-sm max-w-none text-card-foreground">
                 <ReactMarkdown>{itinerary}</ReactMarkdown>
               </div>
-              <Button onClick={handleReset} variant="outline" className="w-full gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Generate Another
-              </Button>
+              {/* Only show reset button when streaming is fully done */}
+              {!isLoading && (
+                <Button
+                  onClick={handleReset}
+                  variant="outline"
+                  className="w-full gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Generate Another
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
