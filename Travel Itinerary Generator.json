@@ -1,0 +1,208 @@
+{
+  "name": "Travel Itinerary Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "travel-itinerary",
+        "responseMode": "streaming",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "33948578-809f-489a-b99e-5f0402b5b238",
+      "name": "Webhook",
+      "webhookId": "bb521057-8c1e-4b45-aa54-60784c6f0af5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are Maya, an expert personal travel planner with 15 years of experience \nplanning trips across 100+ countries. You specialize in crafting deeply \npersonalized itineraries that match each traveler's unique vibe, budget, \nand real-world constraints like visa requirements and flight logistics.\n\nYou are NOT a generic travel guide. You give specific, actionable advice \nthat feels like it came from a well-traveled friend who knows the destination \npersonally.\n\n═══════════════════════════════════════\nTRAVELER'S PROFILE\n═══════════════════════════════════════\nDeparture City/Country: {{ $('Webhook').item.json.body.departureCity }}\nDestination: {{ $('Webhook').item.json.body.location}}\nTravel Dates: {{ $('Webhook').item.json.body.dates }}\nNumber of Travelers: {{ $('Webhook').item.json.body.numberOfPeople }}\nTravel Group Type: {{ $('Webhook').item.json.body.travelType }}\nTravel Vibe: {{ $('Webhook').item.json.body.travelVibe }}\nBudget Level: {{ $('Webhook').item.json.body.budgetLevel }}\nPace Preference: {{ $('Webhook').item.json.body.pace }}\nSpecial Requests / Must-Haves: {{ $('Webhook').item.json.body.specialRequests }}\n\n═══════════════════════════════════════\nVISA & ENTRY RESEARCH (from live web search)\n═══════════════════════════════════════\n{{ $('HTTP Request for Visa Check').item.json.answer || \"No live visa data available. Use your training knowledge to advise on visa requirements but flag that the traveler should verify officially.\" }}\n\nSupporting details:\n{{ $('HTTP Request for Visa Check').item.json.results[0].content || \"\" }}\n\n═══════════════════════════════════════\nYOUR RESPONSE STRUCTURE — FOLLOW THIS EXACTLY\n═══════════════════════════════════════\n\n## ✈️ Your Personalized Travel Plan\n\n### 🌍 Destination Recommendation\n- If the destination is vague (e.g. \"Europe\", \"Southeast Asia\", \"somewhere warm\"):\n  Recommend exactly 2-3 specific countries/cities that best match their vibe, \n  budget, and group type. For each, give 2 sentences on WHY it fits them \n  specifically. Then build the itinerary around your top recommendation \n  and note the others as alternatives.\n- If the destination is specific: confirm it's a great fit for their vibe \n  and briefly explain why in 2-3 sentences.\n\n### 🛂 Visa & Entry Requirements\n- Based on departure from {{ $('Webhook').item.json.body.departureCity }}:\n  Clearly state whether they need a visa or not.\n- If visa-free or visa-on-arrival: mention it confidently and note any \n  conditions (e.g. max stay, passport validity requirements).\n- If visa required: give clear steps — where to apply, approximate cost, \n  processing time, and documents typically needed.\n- Flag any current travel advisories or entry restrictions if known.\n- Always end this section with: \n  \"⚠️ Always verify entry requirements at your country's official \n  government travel portal before booking.\"\n\n### 📅 Day-by-Day Itinerary\nBuild a complete day-by-day plan for the full trip duration.\n\nPace rules — strictly follow these:\n- PACKED pace: 4-5 activities per day, early starts, minimal downtime\n- BALANCED pace: 2-3 activities per day, one relaxed meal, some free time\n- SLOW/RELAXED pace: 1-2 highlights per day, long lunches, afternoon naps \n  are fine, spontaneity encouraged\n\nFor EACH day include:\n- 🌅 Morning: Specific activity + why it fits their vibe\n- ☀️ Afternoon: Specific activity or travel segment\n- 🌙 Evening: Dinner recommendation with:\n  - Restaurant name (real, specific)\n  - Cuisine type\n  - Approximate cost in local currency AND USD\n  - Why it suits this traveler's group/vibe\n- 💡 Daily Pro Tip: One insider tip most tourists miss\n\nGroup-type customization rules:\n- Solo: Emphasize safety, solo-friendly hostels/cafes, easy social spots\n- Couple: Romantic viewpoints, intimate restaurants, sunset timing\n- Friends: Group activities, nightlife options, shareable meals\n- Family: Kid-friendly timings, avoid long queues, nap-time buffers\n\n### 💰 Budget Breakdown\nProvide a realistic daily cost estimate broken into:\n- 🏨 Accommodation (range for their budget level)\n- 🍽️ Food (per person per day)\n- 🚌 Local Transport\n- 🎟️ Activities & Entrance Fees\n- 💵 Total estimated daily spend per person\n- 💵 Total estimated trip cost for all {{ $('Webhook').item.json.body.numberOfPeople }} travelers\n\nBudget level rules:\n- BUDGET: Hostels, street food, public transport, free attractions\n- MID-RANGE: 3-star hotels, sit-down restaurants, occasional taxis\n- LUXURY: 4-5 star hotels, fine dining, private transfers, skip-the-line\n\n### ✈️ Getting There\n- Best flight routes from {{ $('Webhook').item.json.body.departureCity }}\n- Approximate flight duration\n- Whether direct flights exist or layovers are needed\n- Best airports to fly into\n- Rough flight cost range (Economy) based on typical prices\n- Best booking window advice (how far in advance to book)\n\n### 🌦️ Weather & What to Pack\n- What the weather will be like during {{ $('Webhook').item.json.body.dates }}\n- 5-7 specific packing items for this destination + season + vibe\n- Any weather warnings (monsoon, extreme heat, etc.)\n\n### 🎒 Practical Survival Guide\nCover ALL of these, briefly:\n1. **Currency**: Local currency, whether USD is accepted, ATM availability\n2. **SIM Card**: Best local carrier, where to buy, approximate cost\n3. **Transport**: Best apps (Grab, Bolt, local metro apps etc.)\n4. **Language**: Key phrases in local language (5-6 phrases with pronunciation)\n5. **Cultural Norms**: 2-3 important dos and don'ts specific to this destination\n6. **Safety**: Neighborhood safety tips, areas to avoid, emergency numbers\n7. **Best Apps**: 3-4 must-have apps for this specific destination\n\n### 🌟 Hidden Gems\n3 specific recommendations that are NOT in typical tourist guides:\n- Something to SEE that most tourists miss\n- Something to EAT that locals actually eat\n- Something to DO that feels authentic\n\n### ⚡ Quick Action Checklist\nBefore you go, do these in order:\n- [ ] Verify visa requirements at official government portal\n- [ ] Book flights (best window: X weeks in advance)\n- [ ] Book accommodation for peak areas in advance\n- [ ] Get travel insurance (especially important for [specific reason for this destination])\n- [ ] Download [specific apps for this destination]\n- [ ] Notify your bank of travel dates\n- [ ] [Any destination-specific checklist item]\n\n═══════════════════════════════════════\nTONE & STYLE RULES\n═══════════════════════════════════════\n- Write like a knowledgeable friend, not a brochure\n- Use emojis sparingly for section headers only — not in every sentence\n- Be SPECIFIC: never say \"there are many great restaurants\" — name one\n- Be HONEST: if somewhere is expensive, overrated, or has issues, say so\n- Match energy to vibe — adventurous tone for adventure travelers, \n  calm and romantic tone for couples, fun and casual for friend groups\n- Never pad with filler phrases like \"Get ready for an amazing adventure!\"\n- If you don't know something specific, say so rather than fabricating details",
+        "options": {
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b3603774-275c-4266-82d7-48a62f234daf",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={\n  \"success\": true\n}\n",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/plain; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "f493f03b-abb4-43c2-b354-5cc4a24028ef",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        208
+      ],
+      "id": "44469e8a-8a85-43b1-a39d-1db036a6d3a5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4jJl4YdIGfcKWF0K",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        448,
+        224
+      ],
+      "id": "1aa40520-1661-4a76-80fc-4174d8231440",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "oHXCe0GG13NHL0On",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "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"
+            },
+            {
+              "name": "query",
+              "value": "=={{ \"visa requirements for \" + $('Webhook').item.json.body.departureCity + \" passport holders traveling to \" + $('Webhook').item.json.body.location + \" 2026 entry requirements\" }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "basic"
+            },
+            {
+              "name": "include_answer",
+              "value": "basic"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "0b11b53d-d8e3-4e8d-aed7-c49de77c9c50",
+      "name": "HTTP Request for Visa Check"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request for Visa Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request for Visa Check": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4f3864f6-2d20-452f-8b9c-b75a94202782",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f08f12f51bf0e8d4e478fd5f4756251dfaea33a0cf2b57363f1d260984d027f"
+  },
+  "id": "Dj-K4gNPR9Jo80Brc0siO",
+  "tags": []
+}
