@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,11 +62,12 @@ const Index = () => {
               parsed.metadata?.nodeName === "AI Agent" &&
               typeof parsed.content === "string"
             ) {
-              if (!streamStarted) {
-                setIsLoading(false);
-                streamStarted = true;
-              }
-              setItinerary((prev) => prev + parsed.content);
+              flushSync(() => {
+                if (!streamStarted) {
+                  streamStarted = true;
+                }
+                setItinerary((prev) => prev + parsed.content);
+              });
             }
           } catch {
             // Incomplete JSON fragment — will be retried with next chunk
@@ -81,7 +83,9 @@ const Index = () => {
             parsed.metadata?.nodeName === "AI Agent" &&
             typeof parsed.content === "string"
           ) {
-            setItinerary((prev) => prev + parsed.content);
+            flushSync(() => {
+              setItinerary((prev) => prev + parsed.content);
+            });
           }
         } catch {
           // ignore malformed trailing chunk
