@@ -68,6 +68,26 @@ Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and 
 
 Yes, you can!
 
+## N8N Workflow Setup
+
+1. Import `workflow.json` into your N8N instance
+2. Before running, update these values:
+   - SerpAPI node → add your own SerpAPI credential
+   - HTTP Request (Visa Check) node → replace `YOUR_TAVILY_API_KEY_HERE` 
+     with your Tavily key
+   - Webhook URL → will auto-generate when you import into your N8N instance
+```
+
+---
+
+## Step 3 — Add the Raw Export to `.gitignore` (Optional but Safer)
+
+If you want to keep the original unredacted export locally but never risk accidentally committing it:
+```
+# N8N exports with real credentials
+n8n-workflow-raw.json
+workflow-backup.json
+
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
