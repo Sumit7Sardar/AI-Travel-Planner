@@ -18,7 +18,7 @@ const Index = () => {
 
     try {
       const response = await fetch(
-        "https://johnsmith7.app.n8n.cloud/webhook/travel-itinerary",
+        "Insert you webhook URL HERE",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
